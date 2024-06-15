@@ -5,11 +5,16 @@ import namedEntities.NamedEntity;
 import namedEntities.heuristics.*;
 import utils.*;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class App {
+    private static final String bigdataFilepath = "src/main/resources/data/bigdata.txt";
 
     public static void main(String[] args) throws Exception {
         var namedEntitiesDict = JSONParser.parseJsonDict("src/main/resources/data/dictionary.json");
@@ -36,6 +41,13 @@ public class App {
 
         List<Article> articles = extractArticlesFrom(config.feedsData());
 
+        try {
+            writeFeedsToFile(articles);
+        } catch (IOException e) {
+            System.out.println("Error while writing bigdata");
+            System.exit(1);
+        }
+
         if (config.printFeed()) {
             printFeed(articles);
         }
@@ -61,6 +73,20 @@ public class App {
         }
 
         return articles;
+    }
+
+    private static void writeFeedsToFile(List<Article> articles) throws IOException {
+
+        File file = new File(App.bigdataFilepath);
+        var ignored = file.createNewFile();
+        var writer = new FileWriter(App.bigdataFilepath);
+        writer.write("");
+        for (Article article : articles) {
+            writer.append(article.title()).append("\n");
+            writer.append(article.description()).append("\n");
+        }
+        writer.close();
+
     }
 
     private static void printFeed(List<Article> articles) {
