@@ -8,10 +8,13 @@ import utils.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.api.java.JavaRDD;
+
 
 public class App {
     private static final String bigdataFilepath = "src/main/resources/data/bigdata.txt";
@@ -53,7 +56,7 @@ public class App {
         }
 
         if (config.heuristic() != null) {
-            var namedEntities = computeNamedEntities(namedEntitiesDict, config.heuristic(), articles);
+            var namedEntities = computeNamedEntities(namedEntitiesDict, config.heuristic());
             printNamedEntitiesStats(config.statsFormat(), namedEntities);
         }
     }
@@ -98,16 +101,19 @@ public class App {
 
     private static List<NamedEntity> computeNamedEntities(
             NamedEntitiesDictionary namedEntitiesDict,
-            Heuristic heuristic,
-            List<Article> articles
+            Heuristic heuristic
     ) {
         System.out.printf("Computing named entities using '%s' heuristic.\n", heuristic.getLongName());
 
-        var candidates = new ArrayList<String>();
-        for (Article article : articles) {
-            candidates.addAll(heuristic.extractCandidates(article.description()));
-            candidates.addAll(heuristic.extractCandidates(article.title()));
-        }
+        SparkSession spark = SparkSession
+            .builder()
+            .appName("JavaApp")
+            .getOrCreate();
+
+        JavaRDD<String> lines = spark.read().textFile(App.bigdataFilepath).javaRDD();
+        List<String> candidates = lines
+            .flatMap(line -> heuristic.extractCandidates(line).iterator())
+            .collect();
 
         return extractNamedEntities(namedEntitiesDict, candidates);
     }
