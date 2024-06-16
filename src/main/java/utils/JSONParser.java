@@ -52,14 +52,16 @@ public class JSONParser {
         JSONArray keywordsJson = jsonObject.getJSONArray("keywords");
 
         var topics = new ArrayList<String>();
-        for (var topic : topicsJson) {
+        for (int i = 0; i < topicsJson.length(); i++) {
+            var topic = topicsJson.get(i);
             if (topic instanceof String) {
                 topics.add((String) topic);
             }
         }
 
         var keywords = new ArrayList<String>();
-        for (var keyword : keywordsJson) {
+        for (int i = 0; i < keywordsJson.length(); i++) {
+            var keyword = keywordsJson.get(i);
             if (keyword instanceof String) {
                 keywords.add((String) keyword);
             }
