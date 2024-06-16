@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 
 public class App {
@@ -107,13 +108,15 @@ public class App {
                 .getOrCreate();
 
         JavaRDD<String> lines = spark.read().textFile(App.bigdataFilepath).javaRDD();
-        List<String> candidates = lines
+        List<NamedEntity> namedEntities = lines
                 .flatMap(line -> heuristic.extractCandidates(line).iterator())
+                .map(candidate -> extractNamedEntityOrNull(candidate, namedEntitiesDict))
+                .filter(Objects::nonNull)
                 .collect();
 
         spark.stop();
 
-        return extractNamedEntities(namedEntitiesDict, candidates);
+        return namedEntities;
     }
 
     private static void printNamedEntitiesStats(StatisticsFormat statsFormat, List<NamedEntity> namedEntities) {
@@ -165,20 +168,10 @@ public class App {
         }
     }
 
-    private static List<NamedEntity> extractNamedEntities(
-            NamedEntitiesDictionary namedEntitiesDict,
-            List<String> candidates
+    private static NamedEntity extractNamedEntityOrNull(
+            String candidate,
+            NamedEntitiesDictionary namedEntitiesDict
     ) {
-        var namedEntities = new ArrayList<NamedEntity>();
-        for (String candidate : candidates) {
-            var entity = namedEntitiesDict.getByKeywordNormalized(candidate);
-            if (entity == null) {
-                continue;
-            }
-
-            namedEntities.add(entity);
-        }
-
-        return namedEntities;
+        return namedEntitiesDict.getByKeywordNormalized(candidate);
     }
 }
