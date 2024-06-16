@@ -115,6 +115,8 @@ public class App {
             .flatMap(line -> heuristic.extractCandidates(line).iterator())
             .collect();
 
+        spark.stop();
+
         return extractNamedEntities(namedEntitiesDict, candidates);
     }
 
