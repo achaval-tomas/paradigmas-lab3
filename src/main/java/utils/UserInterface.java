@@ -55,9 +55,9 @@ public class UserInterface {
         boolean printFeed = optionDict.containsKey("-pf") || !optionDict.containsKey("-ne");
         List<FeedData> chosenFeeds = getChosenFeeds(optionDict, feedsData);
         Heuristic heuristic = getHeuristic(optionDict, heuristics);
-        StatisticsFormat statsFormat = getStatsFormat(optionDict);
+        StatisticsPrinter statsPrinter = getStatsPrinter(optionDict);
 
-        return new Config(printFeed, chosenFeeds, heuristic, statsFormat);
+        return new Config(printFeed, chosenFeeds, heuristic, statsPrinter);
     }
 
     private HashMap<String, String> parseOptions(String[] args) {
@@ -127,23 +127,28 @@ public class UserInterface {
         return heuristic;
     }
 
-    private StatisticsFormat getStatsFormat(Map<String, String> optionDict) {
-        StatisticsFormat statsFormat = StatisticsFormat.Category;
+    private StatisticsPrinter getStatsPrinter(Map<String, String> optionDict) {
+        StatisticsPrinter statsPrinter;
+
         if (optionDict.containsKey("-sf")) {
             String statsFormatOpt = optionDict.get("-sf");
             switch (statsFormatOpt) {
                 case "cat":
+                    statsPrinter = new CategoryStatisticsPrinter();
                     break;
                 case "topic":
-                    statsFormat = StatisticsFormat.Topic;
+                    statsPrinter = new TopicStatisticsPrinter();
                     break;
                 default:
+                    statsPrinter = null;
                     System.out.printf("Format '%s' does not exist\n", statsFormatOpt);
                     System.out.println("Use --help to check for available formats.");
                     System.exit(1);
-            };
+            }
+        } else {
+            statsPrinter = new CategoryStatisticsPrinter();
         }
 
-        return statsFormat;
+        return statsPrinter;
     }
 }

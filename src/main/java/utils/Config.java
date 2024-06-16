@@ -8,6 +8,6 @@ public record Config(
         boolean printFeed,
         List<FeedData> feedsData,
         Heuristic heuristic, // The heuristic to use for computing named entities, or null to skip computing.
-        StatisticsFormat statsFormat
+        StatisticsPrinter statsPrinter
 ) {
 }

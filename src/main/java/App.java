@@ -11,7 +11,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,7 +56,7 @@ public class App {
 
         if (config.heuristic() != null) {
             var namedEntities = computeNamedEntities(namedEntitiesDict, config.heuristic());
-            printNamedEntitiesStats(config.statsFormat(), namedEntities);
+            printNamedEntitiesStats(config.statsPrinter(), namedEntities);
         }
     }
 
@@ -119,53 +118,10 @@ public class App {
         return namedEntities;
     }
 
-    private static void printNamedEntitiesStats(StatisticsFormat statsFormat, List<NamedEntity> namedEntities) {
+    private static void printNamedEntitiesStats(StatisticsPrinter statsPrinter, List<NamedEntity> namedEntities) {
         System.out.println();
-        switch (statsFormat) {
-            case Category -> printStatsByCategory(namedEntities);
-            case Topic -> printStatsByTopic(namedEntities);
-        }
+        statsPrinter.printStatsFor(namedEntities);
         System.out.println("-".repeat(80));
-    }
-
-    private static void printStatsByCategory(List<NamedEntity> namedEntities) {
-        var statsByCategory = new HashMap<String, HashMap<NamedEntity, Integer>>();
-        for (NamedEntity namedEntity : namedEntities) {
-            var category = namedEntity.getCategoryName();
-            var categoryCounts = statsByCategory.computeIfAbsent(category, k -> new HashMap<>());
-
-            var count = categoryCounts.getOrDefault(namedEntity, 0);
-            categoryCounts.put(namedEntity, count + 1);
-        }
-
-        for (var category : statsByCategory.keySet()) {
-            System.out.printf("Category: %s\n", category);
-            var stats = statsByCategory.get(category);
-            for (var entity : stats.keySet()) {
-                System.out.printf("        %s (%d)\n", entity.getLabel(), stats.get(entity));
-            }
-        }
-    }
-
-    private static void printStatsByTopic(List<NamedEntity> namedEntities) {
-        var statsByTopic = new HashMap<String, HashMap<NamedEntity, Integer>>();
-        for (NamedEntity namedEntity : namedEntities) {
-            var topics = namedEntity.getTopics();
-
-            for (var topic : topics) {
-                var categoryCounts = statsByTopic.computeIfAbsent(topic, k -> new HashMap<>());
-
-                var count = categoryCounts.getOrDefault(namedEntity, 0);
-                categoryCounts.put(namedEntity, count + 1);
-            }
-        }
-        for (var topic : statsByTopic.keySet()) {
-            System.out.printf("Topic: %s\n", topic);
-            var stats = statsByTopic.get(topic);
-            for (var entity : stats.keySet()) {
-                System.out.printf("        %s (%d)\n", entity.getLabel(), stats.get(entity));
-            }
-        }
     }
 
     private static NamedEntity extractNamedEntityOrNull(
