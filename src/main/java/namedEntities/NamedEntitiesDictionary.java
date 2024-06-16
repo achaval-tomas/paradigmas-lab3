@@ -2,10 +2,11 @@ package namedEntities;
 
 import utils.StringUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 
-public class NamedEntitiesDictionary {
+public class NamedEntitiesDictionary implements Serializable {
     private final HashMap<String, NamedEntity> namedEntitiesByKeywordsNormalized;
 
     public NamedEntitiesDictionary(List<NamedEntity> namedEntities) {

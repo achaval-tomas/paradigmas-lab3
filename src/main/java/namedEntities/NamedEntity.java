@@ -1,8 +1,9 @@
 package namedEntities;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class NamedEntity {
+public abstract class NamedEntity implements Serializable {
     private final String label;
     private final List<String> topics;
     private final List<String> keywords;
