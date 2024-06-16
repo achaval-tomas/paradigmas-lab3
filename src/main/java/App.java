@@ -89,7 +89,7 @@ public class App {
     }
 
     private static void printFeed(List<Article> articles) {
-        System.out.println("Printing feed(s) ");
+        System.out.println("Printing feed(s)");
         for (Article article : articles) {
             article.print();
         }
