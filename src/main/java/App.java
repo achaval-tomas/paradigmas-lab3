@@ -3,17 +3,16 @@ import feed.FeedParser;
 import namedEntities.NamedEntitiesDictionary;
 import namedEntities.NamedEntity;
 import namedEntities.heuristics.*;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.sql.SparkSession;
 import utils.*;
 
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import org.apache.spark.sql.SparkSession;
-import org.apache.spark.api.java.JavaRDD;
 
 
 public class App {
@@ -45,7 +44,7 @@ public class App {
         List<Article> articles = extractArticlesFrom(config.feedsData());
 
         try {
-            writeFeedsToFile(articles);
+            writeArticlesToFile(articles);
         } catch (IOException e) {
             System.out.println("Error while writing bigdata");
             System.exit(1);
@@ -78,18 +77,15 @@ public class App {
         return articles;
     }
 
-    private static void writeFeedsToFile(List<Article> articles) throws IOException {
+    private static void writeArticlesToFile(List<Article> articles) throws IOException {
+        var writer = new BufferedWriter(new FileWriter(App.bigdataFilepath));
 
-        File file = new File(App.bigdataFilepath);
-        var ignored = file.createNewFile();
-        var writer = new FileWriter(App.bigdataFilepath);
-        writer.write("");
         for (Article article : articles) {
             writer.append(article.title()).append("\n");
             writer.append(article.description()).append("\n");
         }
-        writer.close();
 
+        writer.close();
     }
 
     private static void printFeed(List<Article> articles) {
@@ -106,14 +102,14 @@ public class App {
         System.out.printf("Computing named entities using '%s' heuristic.\n", heuristic.getLongName());
 
         SparkSession spark = SparkSession
-            .builder()
-            .appName("JavaApp")
-            .getOrCreate();
+                .builder()
+                .appName("JavaApp")
+                .getOrCreate();
 
         JavaRDD<String> lines = spark.read().textFile(App.bigdataFilepath).javaRDD();
         List<String> candidates = lines
-            .flatMap(line -> heuristic.extractCandidates(line).iterator())
-            .collect();
+                .flatMap(line -> heuristic.extractCandidates(line).iterator())
+                .collect();
 
         spark.stop();
 
