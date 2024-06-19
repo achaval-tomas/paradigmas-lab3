@@ -12,7 +12,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class App {
@@ -108,10 +107,11 @@ public class App {
 
         JavaRDD<String> lines = spark.read().textFile(App.bigdataFilepath).javaRDD();
         List<NamedEntity> namedEntities = lines
-                .flatMap(line -> heuristic.extractCandidates(line).iterator())
-                .map(candidate -> extractNamedEntityOrNull(candidate, namedEntitiesDict))
-                .filter(Objects::nonNull)
-                .collect();
+                .flatMap(line -> {
+                            var candidates = heuristic.extractCandidates(line);
+                            return extractNamedEntities(candidates, namedEntitiesDict).iterator();
+                        }
+                ).collect();
 
         spark.stop();
 
@@ -124,10 +124,20 @@ public class App {
         System.out.println("-".repeat(80));
     }
 
-    private static NamedEntity extractNamedEntityOrNull(
-            String candidate,
+    private static List<NamedEntity> extractNamedEntities(
+            List<String> candidates,
             NamedEntitiesDictionary namedEntitiesDict
     ) {
-        return namedEntitiesDict.getByKeywordNormalized(candidate);
+        var namedEntities = new ArrayList<NamedEntity>();
+        for (String candidate : candidates) {
+            var entity = namedEntitiesDict.getByKeywordNormalized(candidate);
+            if (entity == null) {
+                continue;
+            }
+
+            namedEntities.add(entity);
+        }
+
+        return namedEntities;
     }
 }
