@@ -65,6 +65,8 @@ Luego funciona de la siguente manera:
 ### Algunas complicaciones
 
 - Instalar Spark en Windows fue bastante complicado.
+- Tuvimos que modificar el código en una parte que interactuaba con la librería json, pues nos tiraba error al correrlo. 
+  El código en cuestión utilizaba un ciclo "foreach" para acceder a los elementos de un JSONArray.  
 - Al principio nos costó entender cómo correr el código usando spark y la dinámica de crear trabajadores y asignarles recursos. 
   Por ejemplo, tuvimos que darnos cuenta de que un worker solo debe utilizar 1 hilo, ya que si no cada worker usa todos los hilos del sistema y los benchmarks comparando la cantidad de workers no tendrían sentido.
 - Tuvimos que resolver un bug causado por la serialización y deserialización de objetos cuando son mandados a los trabajadores.
