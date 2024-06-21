@@ -45,6 +45,19 @@ El ```2``` en ```--master local[2]``` indica la cantidad de hilos "trabajadores"
 
 ### Tareas distribuidas
 
+Para hacer uso del poder de spark, distribuimos la extracción de entidades nombradas entre los trabajadores que estén disponibles.
+
+Esto requirió crear un "big data", es decir, un archivo de texto grande el cual se puede subdividir y repartir entre los distintos trabajadores.
+Luego cada uno de ellos podrá realizar el cómputo de entidades nombradas sobre su porción del archivo.
+
+Al correr el proyecto, se escriben en el archivo **"big data"** los títulos y descripciones de todos los articulos que se encuentren en los feeds especificados por el usuario.
+
+Luego funciona de la siguente manera:
+
+- El **master** de spark se encarga de la distribución del archivo entre los trabajadores.
+- Cada **trabajador** extrae las entidades nombradas de la porción del archivo que recibió y devuelve sus resultados al **master**.
+- El **master** realiza la unificación de los resultados, imprimiendo en la consola los resultados obtenidos.
+
 ### Complicaciones
 
 ## Lab 2 vs Lab 3
