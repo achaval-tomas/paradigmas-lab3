@@ -1,4 +1,4 @@
-# Informe del laboratorio N°3 de Paradigmas de la Programación 2024
+# Informe del laboratorio N°3 de Paradigmas de Programación 2024
 
 ### Integrantes del grupo T++ (g42)
 Tomás Achával, Tomás Maraschio, Tomás Peyronel
@@ -14,6 +14,8 @@ Tomás Achával, Tomás Maraschio, Tomás Peyronel
 - [Conclusiones](#conclusiones)
 
 ## Introducción
+Este informe contiene un resumen de nuestra experiencia utilizando el framework y la [API para Java](https://spark.apache.org/docs/latest/api/java/index.html) de [Spark](https://spark.apache.org/docs/latest/index.html) en el laboratorio número 3 de la materia Paradigmas de Programación.
+Analizaremos los resultados obtenidos al distribuir el cómputo de entidades nombradas y realizaremos comparaciones con los resultados obtenidos en el laboratorio 2.
 
 ## Laboratorio 3
 
