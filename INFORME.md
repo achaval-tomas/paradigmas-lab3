@@ -53,9 +53,9 @@ Luego cada uno de ellos podrá realizar el cómputo de entidades nombradas sobre
 Al correr el proyecto, se escriben en el archivo **"big data"** los títulos y descripciones de todos los articulos que se encuentren en los feeds especificados por el usuario.
 Luego funciona de la siguente manera:
 
-1) El **master** de spark se encarga de la **distribución del archivo** entre los trabajadores.
-2) Cada **trabajador** extrae las entidades nombradas de la porción del archivo que recibió y devuelve sus resultados al **master**. 
-3) El **master** realiza la unificación de los resultados, imprimiendo en la consola los resultados obtenidos.
+1. El **master** de spark se encarga de la **distribución del archivo** entre los trabajadores. 
+2. Cada **trabajador** extrae las entidades nombradas de la porción del archivo que recibió y devuelve sus resultados al **master**. 
+3. El **master** realiza la unificación de los resultados, imprimiendo en la consola los resultados obtenidos.
 
 ### Complicaciones
 
@@ -65,4 +65,4 @@ Luego funciona de la siguente manera:
 
 **"De los errores se aprende"** - Tomás Maraschio. <br>
 **"bimp zeeble vorp, zorg sible mip"** - Tomás Peyronel. <br>
-**"T++ ahora solo es T"** - Tomás Achaval.
+**"This is the end"** - Tomás Achaval.
