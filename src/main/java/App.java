@@ -106,7 +106,7 @@ public class App {
                 .getOrCreate();
 
         JavaRDD<String> lines = spark.read().textFile(App.bigdataFilepath).javaRDD();
-        List<NamedEntity> namedEntities = lines
+        List<Integer> namedEntitiesIndices = lines
                 .flatMap(line -> {
                             var candidates = heuristic.extractCandidates(line);
                             return extractNamedEntities(candidates, namedEntitiesDict).iterator();
@@ -115,7 +115,7 @@ public class App {
 
         spark.stop();
 
-        return namedEntities;
+        return namedEntitiesIndices.stream().map(namedEntitiesDict::getByIndex).toList();
     }
 
     private static void printNamedEntitiesStats(StatisticsPrinter statsPrinter, List<NamedEntity> namedEntities) {
@@ -124,20 +124,21 @@ public class App {
         System.out.println("-".repeat(80));
     }
 
-    private static List<NamedEntity> extractNamedEntities(
+    private static List<Integer> extractNamedEntities(
             List<String> candidates,
             NamedEntitiesDictionary namedEntitiesDict
     ) {
-        var namedEntities = new ArrayList<NamedEntity>();
+        var namedEntitiesIndices = new ArrayList<Integer>();
+
         for (String candidate : candidates) {
-            var entity = namedEntitiesDict.getByKeywordNormalized(candidate);
-            if (entity == null) {
+            var entityIndex = namedEntitiesDict.getIndexByKeywordNormalized(candidate);
+            if (entityIndex == -1) {
                 continue;
             }
 
-            namedEntities.add(entity);
+            namedEntitiesIndices.add(entityIndex);
         }
 
-        return namedEntities;
+        return namedEntitiesIndices;
     }
 }
