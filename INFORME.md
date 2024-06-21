@@ -10,9 +10,9 @@ Tomás Achával, Tomás Maraschio, Tomás Peyronel
     - [Qué es Spark](#qué-es-spark)
     - [Cómo probar el proyecto](#cómo-probar-el-proyecto)
     - [Cómo usamos Spark](#tareas-distribuidas)
-    - [Complicaciones](#complicaciones)
+    - [Complicaciones](#algunas-complicaciones)
 - [Lab 2 vs Lab 3](#lab-2-vs-lab-3)
-- [Conclusiones](#conclusiones)
+- [Posibles Mejoras](#posibles-mejoras)
 
 ## Introducción
 
@@ -38,11 +38,16 @@ Primero se deben instalar las dependencias necesarias:
 Al descargar spark, se debe descomprimir en un directorio ```<dir>``` y luego ejecutar ```export SPARK_HOME=<dir>/<nombre-spark-descomprimido>```.
 En general, ```<nombre-spark-descomprimido> = spark-3.5.1-bin-hadoop3```.
 
-Ahora para **compilar y correr el proyecto** usando spark se puede ejecutar el siguiente comando desde el directorio del laboratorio:
+Para **compilar el proyecto** se debe ejecutar ```mvn install``` desde la carpeta del laboratorio.
 
-```mvn install && $SPARK_HOME/bin/spark-submit --master local[2] target/App-1.0.jar -ne ID```
+Para **correr el proyecto** montamos y utilizamos un cluster de spark a través del siguiente procedimiento:
 
-El ```2``` en ```--master local[2]``` indica la cantidad de hilos "trabajadores" que se desean utilizar.
+1. Iniciar el proceso master, corriendo ```$SPARK_HOME/bin/spark-class org.apache.spark.deploy.master.Master```
+   Esto nos dará una dirección de la forma **spark://ip:puerto** en donde "corre" el master.
+2. Correr los siguientes comandos en **N terminales distintas**, donde N es la **cantidad de workers** deseados:<br>
+   - ```export SPARK_WORKER_CORES=1``` (o el equivalente en su sistema operativo).
+   - ```$SPARK_HOME/bin/spark-class org.apache.spark.deploy.worker.Worker spark://<ip>:<puerto>```, donde **ip** y **puerto** son los valores obtenidos en el paso 1.
+3. Habiendo compilado el proyecto, correr en otra terminal (desde el directorio del laboratorio): ```$SPARK_HOME/bin/spark-submit --master spark://<ip>:<puerto> target/App-1.0.jar -ne NID```, pudiendo reemplazar "-ne NID" con los argumentos que se deseen.
 
 ### Tareas distribuidas
 
@@ -50,19 +55,65 @@ Para hacer uso del poder de spark, distribuimos la extracción de entidades nomb
 Esto requirió crear un "big data", es decir, un archivo de texto grande el cual se puede subdividir y repartir entre los distintos trabajadores.
 Luego cada uno de ellos podrá realizar el cómputo de entidades nombradas sobre su porción del archivo.
 
-Al correr el proyecto, se escriben en el archivo **"big data"** los títulos y descripciones de todos los articulos que se encuentren en los feeds especificados por el usuario.
+Al correr el proyecto, se escriben en el archivo **"big data"** los títulos y descripciones de todos los artículos que se encuentren en los feeds especificados por el usuario.
 Luego funciona de la siguente manera:
 
 1. El **master** de spark se encarga de la **distribución del archivo** entre los trabajadores. 
 2. Cada **trabajador** extrae las entidades nombradas de la porción del archivo que recibió y devuelve sus resultados al **master**. 
 3. El **master** realiza la unificación de los resultados, imprimiendo en la consola los resultados obtenidos.
 
-### Complicaciones
+### Algunas complicaciones
+
+- Instalar Spark en Windows fue bastante complicado.
+- Al principio nos costó entender cómo correr el código usando spark y la dinámica de crear trabajadores y asignarles recursos. 
+  Por ejemplo, tuvimos que darnos cuenta de que un worker solo debe utilizar 1 hilo, ya que si no cada worker usa todos los hilos del sistema y los benchmarks comparando la cantidad de workers no tendrían sentido.
+- Tuvimos que resolver un bug causado por la serialización y deserialización de objetos cuando son mandados a los trabajadores.
 
 ## Lab 2 vs Lab 3
 
-## Conclusiones
+Para comparar el desempeño de los laboratorios 2 y 3, extrajimos entidades nombradas de un **archivo de 1.56GB**.
 
-**"De los errores se aprende"** - Tomás Maraschio. <br>
-**"bimp zeeble vorp, zorg sible mip"** - Tomás Peyronel. <br>
-**"This is the end"** - Tomás Achaval.
+En el **laboratorio 2** obtuvimos este resultado:<br>
+```
+Computed named entities in 105931ms (105.9s)
+```
+
+Para las pruebas del laboratorio 3 se utilizó una computadora con 4 núcleos y 8 hilos (por hyper-threading) y se le otorgó un hilo a cada trabajador.
+
+Al correrlo utilizando **1 trabajador** de spark, el resultado fue el siguiente:<br>
+```
+Computed named entities in 161110ms (161.1s)
+```
+
+Si utilizamos **2 trabajadores** obtenemos:<br>
+```
+Computed named entities in 104071ms (104.1s)
+```
+ 
+Con **4 trabajadores**, el resultado fue **el mejor**:<br>
+```
+Computed named entities in 76583ms (76.6s)
+```
+
+Finalmente, utilizando **8 trabajadores** de spark, se obtuvo:<br>
+```
+Computed named entities in 85158ms (85.2s)
+```
+
+La primera observación sobre los resultados obtenidos es que utilizar **un solo trabajador** de spark con **un solo núcleo** es **notablemente peor** que no utilizar spark (lab2) pues esto introduce una **gran sobrecarga** sin hacer uso del poder de distribución de cómputo de spark.
+
+También se puede ver que la mejor opción fue distribuir el trabajo entre 4 trabajadores. 
+El declive de rendimiento del caso de 8 trabajadores creemos que se explica con una mezcla de dos factores:
+
+- **Hyper-threading**: al usar los 8 hilos no se consigue el doble de rendimiento que al utilizar 4, pues ahora entra en juego el hyper-threading, que mejora solo ligeramente el rendimiento multi-núcleo.
+- **Overhead de comunicación**: al usar el doble de workers, el overhead de comunicación master-worker es el doble que con 4.
+
+Luego el empeoramiento vendría de que el overhead adicional es mayor que el rendimiento que se gana por usar más workers.
+
+Por otro lado, al correr el proyecto sobre los cuatro feeds originales (muy pocos datos), spark tiene tanto overhead que el código del lab2 era mucho más rápido.
+
+## Posibles Mejoras
+
+- Paralelizar también el fetch de feeds de la red, el cual ahora es responsabilidad total del master.
+- Paralelizar el cómputo (parcial) de estadísticas, y después combinar estos resultados.
+- Quizás configurando mejor spark se pueden obtener mejores resultados.
