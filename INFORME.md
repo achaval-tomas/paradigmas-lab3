@@ -87,7 +87,7 @@ Al correrlo utilizando **1 trabajador** de spark, el resultado fue el siguiente:
 Computed named entities in 161110ms (161.1s)
 ```
 
-Si utilizamos **2 trabajadores** obtenemos:<br>
+Utilizando **2 trabajadores** obtuvimos:<br>
 ```
 Computed named entities in 104071ms (104.1s)
 ```
@@ -97,7 +97,7 @@ Con **4 trabajadores**, el resultado fue **el mejor**:<br>
 Computed named entities in 76583ms (76.6s)
 ```
 
-Finalmente, utilizando **8 trabajadores** de spark, se obtuvo:<br>
+Finalmente, utilizando **8 trabajadores**, se obtuvo:<br>
 ```
 Computed named entities in 85158ms (85.2s)
 ```
