@@ -45,8 +45,8 @@ Para **correr el proyecto** montamos y utilizamos un cluster de spark a través 
 1. Iniciar el proceso master, corriendo ```$SPARK_HOME/bin/spark-class org.apache.spark.deploy.master.Master```
    Esto nos dará una dirección de la forma **spark://ip:puerto** en donde "corre" el master.
 2. Correr los siguientes comandos en **N terminales distintas**, donde **N** es la **cantidad de workers** deseados:<br>
-   - ```export SPARK_WORKER_CORES=1``` (o el equivalente en su sistema operativo).
-   - ```$SPARK_HOME/bin/spark-class org.apache.spark.deploy.worker.Worker spark://<ip>:<puerto>```, donde **ip** y **puerto** son los valores obtenidos en el paso 1.
+    - ```export SPARK_WORKER_CORES=1``` (o el equivalente en su sistema operativo).
+    - ```$SPARK_HOME/bin/spark-class org.apache.spark.deploy.worker.Worker spark://<ip>:<puerto>```, donde **ip** y **puerto** son los valores obtenidos en el paso 1.
 3. Habiendo compilado el proyecto, correr en otra terminal (desde el directorio del laboratorio): ```$SPARK_HOME/bin/spark-submit --master spark://<ip>:<puerto> target/App-1.0.jar -ne NID```, pudiendo reemplazar "-ne NID" con los argumentos que se deseen.
 
 ### Tareas distribuidas
@@ -60,7 +60,7 @@ Luego funciona de la siguente manera:
 
 1. El **master** de spark se encarga de la **distribución del archivo** entre los trabajadores. 
 2. Cada **trabajador** extrae las entidades nombradas de la porción del archivo que recibió y devuelve sus resultados al **master**. 
-3. El **master** realiza la unificación de los resultados, imprimiendo en la consola los resultados obtenidos.
+3. El **master** unifica los resultados parciales de los trabajadores y luego imprime en consola los resultados finales del programa.
 
 ### Algunas complicaciones
 
